@@ -110,6 +110,23 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 .add-root-btn{padding:12px 16px;border:1.5px dashed var(--border);border-radius:var(--radius-sm);background:none;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;font-family:'Manrope',sans-serif;transition:all .15s;display:flex;align-items:center;gap:8px;margin-top:8px}
 .add-root-btn:hover{border-color:var(--text);color:var(--text);background:var(--surface)}
 
+/* IMAGE MODAL */
+.img-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:300;align-items:center;justify-content:center;cursor:zoom-out}
+.img-modal.open{display:flex}
+.img-modal img{max-width:90vw;max-height:90vh;border-radius:8px;object-fit:contain}
+/* DRAG */
+.section-item.dragging{opacity:.4;border:1.5px dashed var(--text)}
+.section-item.drag-over{border-color:var(--text);background:var(--surface2)}
+.drag-handle{cursor:grab;color:var(--muted);padding:0 6px;font-size:14px;flex-shrink:0;user-select:none}
+.drag-handle:active{cursor:grabbing}
+/* TYPE SELECT */
+.type-select-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.type-select-btn{padding:14px;border:1.5px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);cursor:pointer;text-align:center;transition:all .15s;font-family:"Manrope",sans-serif;width:100%}
+.type-select-btn:hover{border-color:var(--text)}
+.type-select-btn.selected{border-color:var(--text);background:var(--surface2)}
+.type-icon{font-size:22px;margin-bottom:4px}
+.type-name{font-size:13px;font-weight:600}
+.type-desc{font-size:11px;color:var(--muted);margin-top:2px}
 .back-btn{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--border);background:var(--surface);border-radius:8px;padding:6px 14px;font-size:13px;font-weight:500;cursor:pointer;color:var(--text);font-family:'Manrope',sans-serif;margin-bottom:20px;transition:all .15s}
 .back-btn:hover{background:var(--surface2)}
 .progress-bar{background:var(--border);border-radius:4px;height:3px;margin-bottom:24px;overflow:hidden}
@@ -202,6 +219,11 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
     <div id="rootFormWrap"></div>
   </div>
 
+</div>
+
+<!-- IMAGE MODAL -->
+<div class="img-modal" id="imgModal" onclick="closeImgModal()">
+  <img id="imgModalSrc" src="" alt="">
 </div>
 
 <!-- LOGIN MODAL -->
@@ -439,9 +461,19 @@ function renderCategories(){
   document.getElementById("addCatFormWrap").innerHTML="";
 }
 function openCat(id){activeCatId=id;goTo('cat')}
+let newCatType='list';
 function showAddCatForm(){
+  newCatType='list';
   document.getElementById('addCatFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">＋ Yangi kategoriya</div>
+    <div class="type-select-grid">
+      <button class="type-select-btn selected" id="typeList" onclick="selectCatType('list')">
+        <div class="type-icon">☰</div><div class="type-name">Oddiy ro'yxat</div><div class="type-desc">Jarayonlar ro'yxati</div>
+      </button>
+      <button class="type-select-btn" id="typeCard" onclick="selectCatType('card')">
+        <div class="type-icon">⊞</div><div class="type-name">Karta</div><div class="type-desc">Ichida bo'limlar</div>
+      </button>
+    </div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="ncTitle" placeholder="Kategoriya nomi..."></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveNewCat()">Saqlash</button>
@@ -450,11 +482,16 @@ function showAddCatForm(){
   </div>`;
   document.getElementById('ncTitle').focus();
 }
+function selectCatType(type){
+  newCatType=type;
+  document.getElementById('typeList').classList.toggle('selected',type==='list');
+  document.getElementById('typeCard').classList.toggle('selected',type==='card');
+}
 function saveNewCat(){
   const sec=db.sections.find(s=>s.id===activeSectionId);if(!sec) return;
   const title=document.getElementById('ncTitle').value.trim();
   if(!title){notify('Nom kiriting!');return;}
-  sec.categories.push({id:'cat'+Date.now(),title,desc:'',flows:[]});
+  sec.categories.push({id:'cat'+Date.now(),title,desc:'',type:newCatType,flows:[],subcategories:[]});
   notify('Saqlandi ✓');saveDB();renderCategories();
 }
 function deleteCat(id){
@@ -604,6 +641,7 @@ function renderNodeHTML(node,numLabel){
       <button class="copy-btn" style="top:6px;right:6px;width:24px;height:24px;font-size:11px" onclick="copyMsg('${node.id}')" title="Nusxa">⧉</button>
     </div>`:''}
     ${node.link?`<div class="node-link">🔗 <a href="${esc(node.link)}" target="_blank" onclick="event.stopPropagation()">${esc(node.link)}</a></div>`:''}
+    ${node.img?`<div style="margin-top:8px"><button onclick="event.stopPropagation();openImgModal('${node.id}')" style="border:1px solid var(--border);background:var(--bg);border-radius:6px;padding:4px 10px;font-size:12px;cursor:pointer;color:var(--muted)">🖼 Rasmni ko'rish</button></div>`:''}
   </div>`;
 
   let childrenHtml='';
@@ -675,6 +713,10 @@ function showNodeForm(nodeOrParentId,_,editMode){
     <div class="form-row"><label class="form-label">Xabar matni</label>
       <textarea class="fi" id="${formId}_msg" style="min-height:70px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:11px">${esc(node?.msg||'')}</textarea></div>
     <div class="form-row"><label class="form-label">Link (ixtiyoriy)</label><input class="fi" id="${formId}_link" value="${esc(node?.link||'')}" placeholder="https://..."></div>
+    <div class="form-row"><label class="form-label">Rasm (ixtiyoriy)</label>
+      <input type="file" accept="image/*" id="${formId}_img" style="font-size:12px;width:100%">
+      ${node?.img?'<div style="font-size:11px;color:var(--muted);margin-top:4px">✓ Rasm biriktirilgan</div>':''}
+    </div>
     <div class="form-actions">
       <button class="btn-save" onclick="${isEdit?`saveEditNode('${nodeOrParentId}','${formId}')`:`saveNewNode('${nodeOrParentId}','${formId}')`}">Saqlash</button>
       <button class="btn-cancel" onclick="renderFlowTree()">Bekor</button>
@@ -687,21 +729,32 @@ function saveNewNode(parentId,formId){
   const msg=document.getElementById(formId+'_msg').value.trim();
   const link=document.getElementById(formId+'_link').value.trim();
   if(!name){notify('Nom kiriting!');return;}
-  const newNode={id:'n'+Date.now(),name,desc:'',msg,link,children:[]};
-  const flow=getActiveFlow();
-  if(!parentId||parentId==='null') flow.nodes.push(newNode);
-  else{const p=findNode(flow.nodes,parentId);if(p) p.children.push(newNode);}
-  notify('Saqlandi ✓');saveDB();renderFlowTree();
+  const imgFile=document.getElementById(formId+'_img')?.files[0];
+  const save=(img)=>{
+    const newNode={id:'n'+Date.now(),name,desc:'',msg,link,img:img||'',children:[]};
+    const flow=getActiveFlow();
+    if(!parentId||parentId==='null') flow.nodes.push(newNode);
+    else{const p=findNode(flow.nodes,parentId);if(p) p.children.push(newNode);}
+    notify('Saqlandi ✓');saveDB();renderFlowTree();
+  };
+  if(imgFile){const r=new FileReader();r.onload=e=>save(e.target.result);r.readAsDataURL(imgFile);}
+  else save('');
 }
 function saveEditNode(nodeId,formId){
   const name=document.getElementById(formId+'_name').value.trim();
   const msg=document.getElementById(formId+'_msg').value.trim();
   const link=document.getElementById(formId+'_link').value.trim();
   if(!name){notify('Nom kiriting!');return;}
+  const imgFile=document.getElementById(formId+'_img')?.files[0];
   const flow=getActiveFlow();
   const node=findNode(flow.nodes,nodeId);if(!node) return;
-  node.name=name;node.msg=msg;node.link=link;
-  notify('Saqlandi ✓');saveDB();renderFlowTree();
+  const save=(img)=>{
+    node.name=name;node.msg=msg;node.link=link;
+    if(img) node.img=img;
+    notify('Saqlandi ✓');saveDB();renderFlowTree();
+  };
+  if(imgFile){const r=new FileReader();r.onload=e=>save(e.target.result);r.readAsDataURL(imgFile);}
+  else save('');
 }
 function deleteNode(nodeId){
   if(!confirm('O\'chirasizmi?')) return;
@@ -711,6 +764,47 @@ function deleteNode(nodeId){
 }
 function findNode(nodes,id){for(const n of nodes){if(n.id===id)return n;const f=findNode(n.children||[],id);if(f)return f;}return null;}
 function removeNode(nodes,id){return nodes.filter(n=>n.id!==id).map(n=>({...n,children:removeNode(n.children||[],id)}));}
+
+// ---- DRAG & DROP ----
+let dragId=null,dragType=null;
+function dragStart(e,id,type){dragId=id;dragType=type;e.currentTarget.classList.add('dragging');}
+function dragOver(e){e.preventDefault();e.currentTarget.classList.add('drag-over');}
+function dragEnd(e){e.currentTarget.classList.remove('dragging');document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));}
+function drop(e,targetId,type){
+  e.preventDefault();
+  document.querySelectorAll('.drag-over').forEach(el=>el.classList.remove('drag-over'));
+  if(!dragId||dragId===targetId) return;
+  const sec=db.sections.find(s=>s.id===activeSectionId);
+  if(type==='flows'){
+    const cat=getActiveCat();if(!cat) return;
+    const arr=cat.flows;
+    const fi=arr.findIndex(x=>x.id===dragId),ti=arr.findIndex(x=>x.id===targetId);
+    if(fi<0||ti<0) return;
+    const [item]=arr.splice(fi,1);arr.splice(ti,0,item);
+    saveDB();renderFlowList();
+  } else if(type==='cats'){
+    const arr=sec.categories.filter(c=>c.type!=='card');
+    const fi=arr.findIndex(x=>x.id===dragId),ti=arr.findIndex(x=>x.id===targetId);
+    const allArr=sec.categories;
+    const afi=allArr.findIndex(x=>x.id===dragId),ati=allArr.findIndex(x=>x.id===targetId);
+    if(afi<0||ati<0) return;
+    const [item]=allArr.splice(afi,1);allArr.splice(ati,0,item);
+    saveDB();renderCategories();
+  }
+  dragId=null;
+}
+
+// ---- IMAGE MODAL ----
+function openImgModal(nodeId){
+  const flow=getActiveFlow();
+  const node=findNode(flow.nodes,nodeId);if(!node||!node.img) return;
+  document.getElementById('imgModalSrc').src=node.img;
+  document.getElementById('imgModal').classList.add('open');
+}
+function closeImgModal(){
+  document.getElementById('imgModal').classList.remove('open');
+  document.getElementById('imgModalSrc').src='';
+}
 
 // ---- UTILS ----
 function copyMsg(id){
