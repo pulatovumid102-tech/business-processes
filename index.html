@@ -454,10 +454,10 @@ function renderCategories(){
       ondrop="drop(event,'${cat.id}','cats')"
       ondragend="dragEnd(event)"
       onclick="openCat('${cat.id}')">
-      ${isAdmin?'<span class="drag-handle" onclick="event.stopPropagation()">⣿</span>':''}`;
+`;
     html+=`<div class="section-item-left"><div class="section-num">${num}</div><div><div class="section-name">${cat.title}</div></div></div>`;
     html+=`<div style="display:flex;align-items:center;gap:8px">`;
-    if(isAdmin) html+=`<div class="section-actions"><button class="btn-sm" onclick="event.stopPropagation();startEditCat('${cat.id}')">✏</button><button class="btn-sm-danger" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button></div>`;
+    if(isAdmin) html+=`<div class="section-actions"><span class="drag-handle" onclick="event.stopPropagation()" style="margin-right:2px">⣿</span><button class="btn-sm" onclick="event.stopPropagation();startEditCat('${cat.id}')">✏</button><button class="btn-sm-danger" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button></div>`;
     html+=`<div class="section-chevron">›</div></div></div>`;
   });
   if(!filtered.length) html=`<div class="no-results">${q?"Hech narsa topilmadi 🔍":"Hozircha kategoriyalar yoq"}</div>`;
@@ -467,19 +467,9 @@ function renderCategories(){
   document.getElementById("addCatFormWrap").innerHTML="";
 }
 function openCat(id){activeCatId=id;goTo('cat')}
-let newCatType='list';
 function showAddCatForm(){
-  newCatType='list';
   document.getElementById('addCatFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">＋ Yangi kategoriya</div>
-    <div class="type-select-grid">
-      <button class="type-select-btn selected" id="typeList" onclick="selectCatType('list')">
-        <div class="type-icon">☰</div><div class="type-name">Oddiy ro'yxat</div><div class="type-desc">Jarayonlar ro'yxati</div>
-      </button>
-      <button class="type-select-btn" id="typeCard" onclick="selectCatType('card')">
-        <div class="type-icon">⊞</div><div class="type-name">Karta</div><div class="type-desc">Ichida bo'limlar</div>
-      </button>
-    </div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="ncTitle" placeholder="Kategoriya nomi..."></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveNewCat()">Saqlash</button>
@@ -488,16 +478,11 @@ function showAddCatForm(){
   </div>`;
   document.getElementById('ncTitle').focus();
 }
-function selectCatType(type){
-  newCatType=type;
-  document.getElementById('typeList').classList.toggle('selected',type==='list');
-  document.getElementById('typeCard').classList.toggle('selected',type==='card');
-}
 function saveNewCat(){
   const sec=db.sections.find(s=>s.id===activeSectionId);if(!sec) return;
   const title=document.getElementById('ncTitle').value.trim();
   if(!title){notify('Nom kiriting!');return;}
-  sec.categories.push({id:'cat'+Date.now(),title,desc:'',type:newCatType,flows:[],subcategories:[]});
+  sec.categories.push({id:'cat'+Date.now(),title,desc:'',type:'list',flows:[]});
   notify('Saqlandi ✓');saveDB();renderCategories();
 }
 function deleteCat(id){
@@ -547,13 +532,13 @@ function renderFlowList(){
       ondrop="drop(event,'${flow.id}','flows')"
       ondragend="dragEnd(event)"
       onclick="openFlow('${flow.id}')">
-      ${isAdmin?'<span class="drag-handle" onclick="event.stopPropagation()">⣿</span>':''}
       <div class="section-item-left">
         <div class="section-num">${num}</div>
         <div><div class="section-name">${esc(flow.title)}</div></div>
       </div>
       <div style="display:flex;align-items:center;gap:8px">
         ${isAdmin?`<div class="section-actions">
+          <span class="drag-handle" onclick="event.stopPropagation()" style="margin-right:2px">⣿</span>
           <button class="btn-sm" onclick="event.stopPropagation();startEditFlowItem('${flow.id}')">✏</button>
           <button class="btn-sm-danger" onclick="event.stopPropagation();deleteFlow('${flow.id}')">✕</button>
         </div>`:''}
