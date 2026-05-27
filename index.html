@@ -290,38 +290,76 @@ function exportData(){
 // ---- DATA ----
 // sections > categories > flows > nodes(tree)
 let db = {
-  sections: [
+  "sections": [
     {
-      id:'sec1', title:'Support', desc:'Mijozlar va hamkorlar bilan ishlash bo\'yicha jarayonlar', icon:'📞',
-      categories: [
+      "id": "sec1",
+      "title": "Support",
+      "desc": "Mijozlar va hamkorlar bilan ishlash bo'yicha jarayonlar",
+      "icon": "📞",
+      "categories": [
         {
-          id:'cat1', title:'Mijozlar murojaatlari', desc:'Buyurtma, to\'lov, yetkazib berish va boshqa mijoz murojaatlari', icon:'👤',
-          flows: [
+          "id": "cat1",
+          "title": "Mijozlar murojaatlari",
+          "desc": "Buyurtma, to'lov, yetkazib berish va boshqa mijoz murojaatlari",
+          "icon": "👤",
+          "flows": [
             {
-              id:'flow1', title:'Buyurtmani bekor qilish', sub:'Murojaatni qayta ishlash ketma-ketligi',
-              nodes:[
-                {id:'n1',name:"Murojaat qabul qilindi",desc:"Mijozdan buyurtmani bekor qilish bo'yicha murojaat keldi",msg:"",link:"",children:[]},
-                {id:'n2',name:"Buyurtma vaqtining rangini aniqlash",desc:"Admin panelda vaqtni tekshiring",msg:"",link:"",children:[
-                  {id:'n2a',name:"🟢 Yashil holat",desc:"1 soat o'tmagan VA olib ketish vaqti hali yaqin emas",msg:"Assalomu alaykum. Buyurtma tasdiqlangan vaqtdan boshlab 1 soat ichida uni ilova orqali mustaqil ravishda bekor qilishingiz mumkin.",link:"",children:[]},
-                  {id:'n2b',name:"🟡 Sariq holat",desc:"1 soat o'tgan VA olib ketish vaqtigacha 30 daqiqadan ko'p",msg:"",link:"",children:[
-                    {id:'n2b1',name:"3 martadan kam",desc:"Mijoz limitiga yetmagan — bekor qiling",msg:"Assalomu alaykum. Buyurtmani bekor qilish bo'yicha murojatingiz ko'rib chiqildi va buyurtma bekor qilindi.\n\nEslatib o'tamiz, muassasa to'plamni aynan siz uchun band qilgan bo'ladi.\n\nKeyingi buyurtmalar bekor qilinmaydi.",link:"",children:[]},
-                    {id:'n2b2',name:"3 martaga yetgan",desc:"Oylik limit to'lgan — rad eting",msg:"Assalomu alaykum hurmatli mijoz!\n\nAfsuski sizning buyurtmangizni bekor qilib berolmaymiz. Sizda bir oyda support orqali 3 martadan ortiq bekor qilish holati kuzatilgan.",link:"",children:[]}
-                  ]},
-                  {id:'n2c',name:"🔴 Qizil holat",desc:"Olib ketish vaqtigacha 30 daqiqadan kam qolgan",msg:"Assalomu alaykum hurmatli mijoz.\n\nUzr, olib ketish vaqtiga 30 daqiqadan kam vaqt bo'lganda buyurtmalarni bekor qilib bo'lmaydi.",link:"",children:[]}
-                ]}
+              "id": "flow1",
+              "title": "Buyurtmani bekor qilish",
+              "sub": "Murojaatni qayta ishlash ketma-ketligi",
+              "nodes": [
+                {
+                  "id": "n1779884724663",
+                  "name": "Salomlashish",
+                  "desc": "",
+                  "msg": "Assalomu alaykum ushbu toyhonaga yigilga aziz muxlislar sizlarga man baxt tilyman",
+                  "link": "",
+                  "img": "",
+                  "children": []
+                },
+                {
+                  "id": "n1779884821983",
+                  "name": "Mirojat qilinganini vaqtni qaysi toyifada ekanini aniqlash",
+                  "desc": "",
+                  "msg": "",
+                  "link": "",
+                  "img": "",
+                  "children": [
+                    {
+                      "id": "n1779884845377",
+                      "name": "Yashil vaqt",
+                      "desc": "",
+                      "msg": "",
+                      "link": "",
+                      "img": "",
+                      "children": []
+                    },
+                    {
+                      "id": "n1779885036389",
+                      "name": "Qizil vaqt",
+                      "desc": "",
+                      "msg": "",
+                      "link": "",
+                      "img": "",
+                      "children": []
+                    }
+                  ]
+                }
               ]
             }
           ]
         },
         {
-          id:'cat2', title:'Hamkorlar murojaatlari', desc:'Restoran va yetkazib beruvchilar bilan ishlash', icon:'🤝',
-          flows:[]
+          "id": "cat2",
+          "title": "Hamkorlar murojaatlari",
+          "desc": "Restoran va yetkazib beruvchilar bilan ishlash",
+          "icon": "🤝",
+          "flows": []
         }
       ]
     }
   ]
 };
-
 // ---- LOCALSTORAGE ----
 const DB_KEY="biznes_jarayonlar_db";
 function saveDB(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){}}
