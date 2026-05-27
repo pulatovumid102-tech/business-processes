@@ -375,6 +375,7 @@ function showAddSectionForm(){
   document.getElementById('addSectionFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">＋ Yangi bo'lim</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="nsTitle" placeholder="Bo'lim nomi..."></div>
+    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="nsDesc" placeholder="Qisqacha tavsif..."></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveNewSection()">Saqlash</button>
       <button class="btn-cancel" onclick="renderSections()">Bekor</button>
@@ -384,8 +385,9 @@ function showAddSectionForm(){
 }
 function saveNewSection(){
   const title=document.getElementById('nsTitle').value.trim();
+  const desc=document.getElementById('nsDesc').value.trim();
   if(!title){notify('Nom kiriting!');return;}
-  db.sections.push({id:'sec'+Date.now(),title,desc:'',categories:[]});
+  db.sections.push({id:'sec'+Date.now(),title,desc,categories:[]});
   notify('Saqlandi ✓');saveDB();renderSections();
 }
 function deleteSection(id){
@@ -398,6 +400,7 @@ function startEditSection(id){
   document.getElementById('addSectionFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">✏ Bo'limni tahrirlash</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="esTitle" value="${esc(sec.title)}"></div>
+    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="esDesc" value="${esc(sec.desc||'')}"></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveEditSection('${id}')">Saqlash</button>
       <button class="btn-cancel" onclick="renderSections()">Bekor</button>
@@ -408,6 +411,7 @@ function startEditSection(id){
 function saveEditSection(id){
   const sec=db.sections.find(s=>s.id===id);if(!sec) return;
   sec.title=document.getElementById('esTitle').value.trim()||sec.title;
+  sec.desc=document.getElementById('esDesc').value.trim();
   notify('Saqlandi ✓');saveDB();renderSections();
 }
 
