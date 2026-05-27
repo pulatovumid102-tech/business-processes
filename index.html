@@ -356,7 +356,6 @@ function showAddSectionForm(){
   document.getElementById('addSectionFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">＋ Yangi bo'lim</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="nsTitle" placeholder="Bo'lim nomi..."></div>
-    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="nsDesc" placeholder="Qisqacha tavsif..."></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveNewSection()">Saqlash</button>
       <button class="btn-cancel" onclick="renderSections()">Bekor</button>
@@ -366,9 +365,8 @@ function showAddSectionForm(){
 }
 function saveNewSection(){
   const title=document.getElementById('nsTitle').value.trim();
-  const desc=document.getElementById('nsDesc').value.trim();
   if(!title){notify('Nom kiriting!');return;}
-  db.sections.push({id:'sec'+Date.now(),title,desc,categories:[]});
+  db.sections.push({id:'sec'+Date.now(),title,desc:'',categories:[]});
   notify('Saqlandi ✓');renderSections();
 }
 function deleteSection(id){
@@ -381,7 +379,6 @@ function startEditSection(id){
   document.getElementById('addSectionFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">✏ Bo'limni tahrirlash</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="esTitle" value="${esc(sec.title)}"></div>
-    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="esDesc" value="${esc(sec.desc||'')}"></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveEditSection('${id}')">Saqlash</button>
       <button class="btn-cancel" onclick="renderSections()">Bekor</button>
@@ -392,7 +389,6 @@ function startEditSection(id){
 function saveEditSection(id){
   const sec=db.sections.find(s=>s.id===id);if(!sec) return;
   sec.title=document.getElementById('esTitle').value.trim()||sec.title;
-  sec.desc=document.getElementById('esDesc').value.trim();
   notify('Saqlandi ✓');renderSections();
 }
 
@@ -424,7 +420,6 @@ function showAddCatForm(){
   document.getElementById('addCatFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">＋ Yangi kategoriya</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="ncTitle" placeholder="Kategoriya nomi..."></div>
-    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="ncDesc" placeholder="Qisqacha tavsif..."></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveNewCat()">Saqlash</button>
       <button class="btn-cancel" onclick="renderCategories()">Bekor</button>
@@ -435,9 +430,8 @@ function showAddCatForm(){
 function saveNewCat(){
   const sec=db.sections.find(s=>s.id===activeSectionId);if(!sec) return;
   const title=document.getElementById('ncTitle').value.trim();
-  const desc=document.getElementById('ncDesc').value.trim();
   if(!title){notify('Nom kiriting!');return;}
-  sec.categories.push({id:'cat'+Date.now(),title,desc,flows:[]});
+  sec.categories.push({id:'cat'+Date.now(),title,desc:'',flows:[]});
   notify('Saqlandi ✓');renderCategories();
 }
 function deleteCat(id){
@@ -452,7 +446,6 @@ function startEditCat(id){
   document.getElementById('addCatFormWrap').innerHTML=`<div class="inline-form fade-in">
     <div class="inline-form-title">✏ Kategoriyani tahrirlash</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="ecTitle" value="${esc(cat.title)}"></div>
-    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="ecDesc" value="${esc(cat.desc||'')}"></div>
     <div class="form-actions">
       <button class="btn-save" onclick="saveEditCat('${id}')">Saqlash</button>
       <button class="btn-cancel" onclick="renderCategories()">Bekor</button>
@@ -464,7 +457,6 @@ function saveEditCat(id){
   const sec=db.sections.find(s=>s.id===activeSectionId);
   const cat=sec?.categories.find(c=>c.id===id);if(!cat) return;
   cat.title=document.getElementById('ecTitle').value.trim()||cat.title;
-  cat.desc=document.getElementById('ecDesc').value.trim();
   notify('Saqlandi ✓');renderCategories();
 }
 
@@ -653,12 +645,11 @@ function showNodeForm(nodeOrParentId,_,editMode){
   const isEdit=!!editMode;
   const flow=getActiveFlow();
   let node=isEdit?findNode(flow.nodes,nodeOrParentId):null;
-  const formId=isEdit?`editForm-${nodeOrParentId}`:(nodeOrParentId?`childForm-${nodeOrParentId}`:'rootFormWrap');
+  const formId=isEdit?`editForm-${nodeOrParentId}`:(nodeOrParentId&&nodeOrParentId!=='null'?`childForm-${nodeOrParentId}`:'rootFormWrap');
   const target=document.getElementById(formId);if(!target) return;
   target.innerHTML=`<div class="inline-form fade-in" style="width:var(--card-w);margin-top:6px">
     <div class="inline-form-title">${isEdit?'✏ Tahrirlash':'＋ Yangi'}</div>
     <div class="form-row"><label class="form-label">Nomi</label><input class="fi" id="${formId}_name" value="${esc(node?.name||'')}"></div>
-    <div class="form-row"><label class="form-label">Tavsif</label><input class="fi" id="${formId}_desc" value="${esc(node?.desc||'')}"></div>
     <div class="form-row"><label class="form-label">Xabar matni</label>
       <textarea class="fi" id="${formId}_msg" style="min-height:70px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:11px">${esc(node?.msg||'')}</textarea></div>
     <div class="form-row"><label class="form-label">Link (ixtiyoriy)</label><input class="fi" id="${formId}_link" value="${esc(node?.link||'')}" placeholder="https://..."></div>
@@ -671,25 +662,23 @@ function showNodeForm(nodeOrParentId,_,editMode){
 }
 function saveNewNode(parentId,formId){
   const name=document.getElementById(formId+'_name').value.trim();
-  const desc=document.getElementById(formId+'_desc').value.trim();
   const msg=document.getElementById(formId+'_msg').value.trim();
   const link=document.getElementById(formId+'_link').value.trim();
   if(!name){notify('Nom kiriting!');return;}
-  const newNode={id:'n'+Date.now(),name,desc,msg,link,children:[]};
+  const newNode={id:'n'+Date.now(),name,desc:'',msg,link,children:[]};
   const flow=getActiveFlow();
-  if(!parentId) flow.nodes.push(newNode);
+  if(!parentId||parentId==='null') flow.nodes.push(newNode);
   else{const p=findNode(flow.nodes,parentId);if(p) p.children.push(newNode);}
   notify('Saqlandi ✓');renderFlowTree();
 }
 function saveEditNode(nodeId,formId){
   const name=document.getElementById(formId+'_name').value.trim();
-  const desc=document.getElementById(formId+'_desc').value.trim();
   const msg=document.getElementById(formId+'_msg').value.trim();
   const link=document.getElementById(formId+'_link').value.trim();
   if(!name){notify('Nom kiriting!');return;}
   const flow=getActiveFlow();
   const node=findNode(flow.nodes,nodeId);if(!node) return;
-  node.name=name;node.desc=desc;node.msg=msg;node.link=link;
+  node.name=name;node.msg=msg;node.link=link;
   notify('Saqlandi ✓');renderFlowTree();
 }
 function deleteNode(nodeId){
