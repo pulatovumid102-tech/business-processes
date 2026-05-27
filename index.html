@@ -595,7 +595,6 @@ function renderNodeHTML(node,numLabel){
     <div class="node-num">${numLabel}</div>
     ${adminBtns}
     <div class="node-name">${esc(node.name)}</div>
-    ${node.desc?`<div class="node-desc">${esc(node.desc)}</div>`:''}
     ${node.msg?`<div class="node-msg-wrap">
       <div class="node-msg" id="msg-${node.id}">${esc(node.msg)}</div>
       <button class="copy-btn" style="top:6px;right:6px;width:24px;height:24px;font-size:11px" onclick="copyMsg('${node.id}')" title="Nusxa">⧉</button>
