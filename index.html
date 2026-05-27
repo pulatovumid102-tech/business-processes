@@ -133,6 +133,7 @@ body{font-family:'Manrope',sans-serif;background:var(--bg);color:var(--text);min
 <body>
 
 <div class="header">
+  <button class="admin-btn" id="exportBtn" onclick="exportData()" style="display:none">⬇ Saqlash</button>
   <button class="admin-btn" id="adminBtn" onclick="handleAdminBtn()">⚙ Admin</button>
 </div>
 <div class="breadcrumb" id="breadcrumb"></div>
@@ -238,6 +239,7 @@ function doLogin(){
     isAdmin=true;closeLoginModal();
     const btn=document.getElementById('adminBtn');
     btn.classList.add('active');btn.textContent='⚙ Admin (chiqish)';
+    document.getElementById('exportBtn').style.display='inline-flex';
     notify('Admin rejimiga kirildingiz ✓');renderCurrent();
   } else {
     document.getElementById('loginError').classList.add('show');
@@ -249,7 +251,18 @@ function doLogout(){
   isAdmin=false;
   const btn=document.getElementById('adminBtn');
   btn.classList.remove('active');btn.textContent='⚙ Admin';
+  document.getElementById('exportBtn').style.display='none';
   notify('Chiqildi');renderCurrent();
+}
+function exportData(){
+  const json=JSON.stringify(db,null,2);
+  const blob=new Blob([json],{type:'application/json'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');
+  a.href=url;a.download='biznes-jarayonlar.json';
+  document.body.appendChild(a);a.click();
+  document.body.removeChild(a);URL.revokeObjectURL(url);
+  notify('Ma\'lumotlar saqlandi ✓');
 }
 
 // ---- DATA ----
