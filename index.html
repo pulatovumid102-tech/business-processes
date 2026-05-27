@@ -287,6 +287,12 @@ let db = {
   ]
 };
 
+// ---- LOCALSTORAGE ----
+const DB_KEY="biznes_jarayonlar_db";
+function saveDB(){try{localStorage.setItem(DB_KEY,JSON.stringify(db));}catch(e){}}
+function loadDB(){try{const saved=localStorage.getItem(DB_KEY);if(saved)db=JSON.parse(saved);}catch(e){}}
+loadDB();
+
 // ---- STATE ----
 let navHistory=['home'];
 let activeSectionId=null, activeCatId=null, activeFlowId=null;
@@ -367,12 +373,12 @@ function saveNewSection(){
   const title=document.getElementById('nsTitle').value.trim();
   if(!title){notify('Nom kiriting!');return;}
   db.sections.push({id:'sec'+Date.now(),title,desc:'',categories:[]});
-  notify('Saqlandi ✓');renderSections();
+  notify('Saqlandi ✓');saveDB();renderSections();
 }
 function deleteSection(id){
   if(!confirm('O\'chirasizmi?')) return;
   db.sections=db.sections.filter(s=>s.id!==id);
-  notify('O\'chirildi ✓');renderSections();
+  notify("O'chirildi ✓");saveDB();renderSections();
 }
 function startEditSection(id){
   const sec=db.sections.find(s=>s.id===id);if(!sec) return;
@@ -389,7 +395,7 @@ function startEditSection(id){
 function saveEditSection(id){
   const sec=db.sections.find(s=>s.id===id);if(!sec) return;
   sec.title=document.getElementById('esTitle').value.trim()||sec.title;
-  notify('Saqlandi ✓');renderSections();
+  notify('Saqlandi ✓');saveDB();renderSections();
 }
 
 // ---- CATEGORIES ----
@@ -432,13 +438,13 @@ function saveNewCat(){
   const title=document.getElementById('ncTitle').value.trim();
   if(!title){notify('Nom kiriting!');return;}
   sec.categories.push({id:'cat'+Date.now(),title,desc:'',flows:[]});
-  notify('Saqlandi ✓');renderCategories();
+  notify('Saqlandi ✓');saveDB();renderCategories();
 }
 function deleteCat(id){
   if(!confirm('O\'chirasizmi?')) return;
   const sec=db.sections.find(s=>s.id===activeSectionId);if(!sec) return;
   sec.categories=sec.categories.filter(c=>c.id!==id);
-  notify('O\'chirildi ✓');renderCategories();
+  notify("O'chirildi ✓");saveDB();renderCategories();
 }
 function startEditCat(id){
   const sec=db.sections.find(s=>s.id===activeSectionId);
@@ -457,7 +463,7 @@ function saveEditCat(id){
   const sec=db.sections.find(s=>s.id===activeSectionId);
   const cat=sec?.categories.find(c=>c.id===id);if(!cat) return;
   cat.title=document.getElementById('ecTitle').value.trim()||cat.title;
-  notify('Saqlandi ✓');renderCategories();
+  notify('Saqlandi ✓');saveDB();renderCategories();
 }
 
 // ---- FLOWS LIST ----
@@ -513,13 +519,13 @@ function saveNewFlow(){
   const title=document.getElementById('nfTitle').value.trim();
   if(!title){notify('Nom kiriting!');return;}
   cat.flows.push({id:'flow'+Date.now(),title,sub:'Murojaatni qayta ishlash ketma-ketligi',nodes:[]});
-  notify('Saqlandi ✓');renderFlowList();
+  notify('Saqlandi ✓');saveDB();renderFlowList();
 }
 function deleteFlow(id){
   if(!confirm('O\'chirasizmi?')) return;
   const cat=getActiveCat();if(!cat) return;
   cat.flows=cat.flows.filter(f=>f.id!==id);
-  notify('O\'chirildi ✓');renderFlowList();
+  notify("O'chirildi ✓");saveDB();renderFlowList();
 }
 function startEditFlowItem(id){
   const cat=getActiveCat();
@@ -540,7 +546,7 @@ function saveEditFlowItem(id){
   const flow=cat?.flows.find(f=>f.id===id);if(!flow) return;
   const title=document.getElementById('efItemTitle').value.trim();
   if(!title) return;
-  flow.title=title;notify('Saqlandi ✓');renderFlowList();
+  flow.title=title;notify('Saqlandi ✓');saveDB();renderFlowList();
 }
 
 // ---- FLOW TREE ----
@@ -631,13 +637,13 @@ function saveFlowName(){
   flow.title=title;
   document.getElementById('flow-title').textContent=title;
   document.getElementById('editFlowNameForm').style.display='none';
-  notify('Saqlandi ✓');updateBreadcrumb();
+  notify('Saqlandi ✓');saveDB();updateBreadcrumb();
 }
 function deleteCurrentFlow(){
   if(!confirm('O\'chirasizmi?')) return;
   const cat=getActiveCat();if(!cat) return;
   cat.flows=cat.flows.filter(f=>f.id!==activeFlowId);
-  activeFlowId=null;notify('O\'chirildi ✓');goBack('cat');
+  activeFlowId=null;notify("O'chirildi ✓");saveDB();goBack('cat');
 }
 
 // ---- NODE FORM ----
@@ -669,7 +675,7 @@ function saveNewNode(parentId,formId){
   const flow=getActiveFlow();
   if(!parentId||parentId==='null') flow.nodes.push(newNode);
   else{const p=findNode(flow.nodes,parentId);if(p) p.children.push(newNode);}
-  notify('Saqlandi ✓');renderFlowTree();
+  notify('Saqlandi ✓');saveDB();renderFlowTree();
 }
 function saveEditNode(nodeId,formId){
   const name=document.getElementById(formId+'_name').value.trim();
@@ -679,13 +685,13 @@ function saveEditNode(nodeId,formId){
   const flow=getActiveFlow();
   const node=findNode(flow.nodes,nodeId);if(!node) return;
   node.name=name;node.msg=msg;node.link=link;
-  notify('Saqlandi ✓');renderFlowTree();
+  notify('Saqlandi ✓');saveDB();renderFlowTree();
 }
 function deleteNode(nodeId){
   if(!confirm('O\'chirasizmi?')) return;
   const flow=getActiveFlow();
   flow.nodes=removeNode(flow.nodes,nodeId);
-  notify('O\'chirildi ✓');renderFlowTree();
+  notify("O'chirildi ✓");saveDB();renderFlowTree();
 }
 function findNode(nodes,id){for(const n of nodes){if(n.id===id)return n;const f=findNode(n.children||[],id);if(f)return f;}return null;}
 function removeNode(nodes,id){return nodes.filter(n=>n.id!==id).map(n=>({...n,children:removeNode(n.children||[],id)}));}
