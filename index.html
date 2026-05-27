@@ -448,7 +448,13 @@ function renderCategories(){
   let html="";
   filtered.forEach((cat,i)=>{
     const num=String(i+1).padStart(2,"0");
-    html+=`<div class="section-item" onclick="openCat('${cat.id}')">`;
+    html+=`<div class="section-item" draggable="${isAdmin}" 
+      ondragstart="dragStart(event,'${cat.id}','cats')"
+      ondragover="dragOver(event)"
+      ondrop="drop(event,'${cat.id}','cats')"
+      ondragend="dragEnd(event)"
+      onclick="openCat('${cat.id}')">
+      ${isAdmin?'<span class="drag-handle" onclick="event.stopPropagation()">⣿</span>':''}`;
     html+=`<div class="section-item-left"><div class="section-num">${num}</div><div><div class="section-name">${cat.title}</div></div></div>`;
     html+=`<div style="display:flex;align-items:center;gap:8px">`;
     if(isAdmin) html+=`<div class="section-actions"><button class="btn-sm" onclick="event.stopPropagation();startEditCat('${cat.id}')">✏</button><button class="btn-sm-danger" onclick="event.stopPropagation();deleteCat('${cat.id}')">✕</button></div>`;
@@ -535,7 +541,13 @@ function renderFlowList(){
   let html='';
   filtered.forEach((flow,i)=>{
     const num=String(i+1).padStart(2,'0');
-    html+=`<div class="section-item" onclick="openFlow('${flow.id}')">
+    html+=`<div class="section-item" draggable="${isAdmin}"
+      ondragstart="dragStart(event,'${flow.id}','flows')"
+      ondragover="dragOver(event)"
+      ondrop="drop(event,'${flow.id}','flows')"
+      ondragend="dragEnd(event)"
+      onclick="openFlow('${flow.id}')">
+      ${isAdmin?'<span class="drag-handle" onclick="event.stopPropagation()">⣿</span>':''}
       <div class="section-item-left">
         <div class="section-num">${num}</div>
         <div><div class="section-name">${esc(flow.title)}</div></div>
